@@ -46,7 +46,7 @@ def get_next_player(curr_player):
     return [d["name"] for d in players if d["name"] != curr_player][0]
 
 def found_three_occurences(symbol_positions):
-    winning_positions = [(0, 1, 2), (3, 4, 6), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 6, 8), (0, 4, 8), (2, 4, 6)]
+    winning_positions = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
     for pos in winning_positions:
         common_pos = tuple(sorted(set(symbol_positions).intersection(set(pos))))
         if pos == common_pos:
