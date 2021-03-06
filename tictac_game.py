@@ -12,6 +12,7 @@ def assign_symbols_and_get_starting_player(players):
     global player_to_start
     player1_name = players[0]["name"]
     player1_symbol = str(input(f"{player1_name}: Enter your symbol of choice (X / O): "))
+    player1_symbol = player1_symbol.upper()
     if player1_symbol not in symbols:
         print("Wrong choice! Try again!")
         assign_symbols_and_get_starting_player(players)
@@ -53,13 +54,18 @@ def found_three_occurences(symbol_positions):
             return True
     return False
 
-def check_if_game_over(curr_player, board_state):
+def check_if_game_over(curr_player, board_state): 
     player_symbol = [d["symbol"] for d in players if d["name"] == curr_player][0]
     symbol_positions = [i for i, symbol in enumerate(board_state[2:]) if player_symbol in symbol]
     if found_three_occurences(symbol_positions):
         return True, curr_player
     else:
-        return False, curr_player
+        remaining_positions = [pos for pos in board_state[2:] if pos.strip().isdigit()]
+        if len(remaining_positions) == 0:
+            return True, None
+        else:
+            return False, curr_player
+        
 
 def play_game(curr_player, board_state):
     try:
@@ -79,21 +85,35 @@ def play_game(curr_player, board_state):
     board_state[player_num + 1] = [" " + d["symbol"] + " " for d in players if d["name"] == curr_player][0]
     print_board(board_state)
     is_game_over, winner = check_if_game_over(curr_player, board_state)
-    if not is_game_over:
+    if not is_game_over and winner:
         next_player = get_next_player(curr_player)
         play_game(next_player, board_state)
     else:
-        print(f"\n{winner} have won the game!")
+        if winner and is_game_over:
+            print(f"\n{winner} have won the game!")
+        elif not winner and is_game_over:
+            print(f"Whew! That was a tough one. Both of you were great but none of you are winner.")
+        replay_choice = str(input("Want to play again? (Y/N): "))
+        if replay_choice in ('Y', 'y'):
+            retain_choice = str(input("Want to retain the same players? (Y/N): "))
+            if retain_choice in ('Y', 'y'):
+                initiate(players[0]['name'], players[1]['name'])
+            else:
+                initiate()
         sys.exit(1)
 
-
-if __name__ == '__main__':
-    player1_name = str(input("Enter Player 1 name: "))
-    players.append({"name": player1_name})
-    player2_name = str(input("Enter Player 2 name: "))
-    players.append({"name": player2_name})
+def initiate(player1_name=None, player2_name=None):
+    if not player1_name:
+        player1_name = str(input("Enter Player 1 name: "))
+        players.append({"name": player1_name})
+    if not player2_name:
+        player2_name = str(input("Enter Player 2 name: "))
+        players.append({"name": player2_name})
     board_state = reset_board()
     print_board(board_state)
     assign_symbols_and_get_starting_player(players)
     play_game(player_to_start, board_state)
+
+if __name__ == '__main__':
+    initiate()
     
