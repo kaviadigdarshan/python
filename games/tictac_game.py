@@ -1,8 +1,11 @@
 import sys
+from termcolor import colored
 
-players = []
-symbols = ["X", "O"]
+symbols = ("X", "O")
+color_index = {"X": "red", "O": "green"}
+color_it = lambda n: colored(n, color_index.get(n, 'white'), attrs=['bold'])
 global player_to_start; player_to_start = None
+global players; players = []
 
 def reset_board():
     board_initial_state = ["+", "|", " 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
@@ -14,7 +17,7 @@ def assign_symbols_and_get_starting_player(players):
     player1_symbol = str(input(f"{player1_name}: Enter your symbol of choice (X / O): "))
     player1_symbol = player1_symbol.upper()
     if player1_symbol not in symbols:
-        print("Wrong choice! Try again!")
+        print(colored("Wrong choice! Try again!", "magenta"))
         assign_symbols_and_get_starting_player(players)
     else:
         players[0]["symbol"] = player1_symbol
@@ -38,7 +41,7 @@ def print_board(board_state):
 def is_number_valid(player_num, board_state):
     is_valid = False
     for i in board_state[2:]:
-        if i.strip() not in symbols:
+        if i.strip() not in symbols and i.strip().isdigit():
           if int(i) == player_num:
             is_valid = True
     return is_valid
@@ -71,18 +74,18 @@ def play_game(curr_player, board_state):
     try:
         player_num = int(input(f"\n{curr_player}, Enter a number on the board: "))
     except ValueError:
-        print(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.")
+        print(colored(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.", "magenta"))
         print_board(board_state)
         play_game(curr_player, board_state)
     if player_num > 9 or player_num < 0:
-        print(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.")
+        print(colored(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.", "magenta"))
         print_board(board_state)
         play_game(curr_player, board_state)
     if not is_number_valid(player_num, board_state):
-        print(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.")
+        print(colored(f"\n{curr_player}: Incorrect Input! Enter the number which is present on the board. Try again.", "magenta"))
         print_board(board_state)
         play_game(curr_player, board_state)
-    board_state[player_num + 1] = [" " + d["symbol"] + " " for d in players if d["name"] == curr_player][0]
+    board_state[player_num + 1] = [" " + color_it(d["symbol"]) + " " for d in players if d["name"] == curr_player][0]
     print_board(board_state)
     is_game_over, winner = check_if_game_over(curr_player, board_state)
     if not is_game_over and winner:
@@ -90,9 +93,9 @@ def play_game(curr_player, board_state):
         play_game(next_player, board_state)
     else:
         if winner and is_game_over:
-            print(f"\n{winner} have won the game!")
+            print(colored(f"\n{winner} have won the game!", "green"))
         elif not winner and is_game_over:
-            print(f"Whew! That was a tough one. Both of you were great but none of you are winner.")
+            print(colored(f"Whew! That was a tough one. Both of you were great but none of you are winner.", "cyan"))
         replay_choice = str(input("Want to play again? (Y/N): "))
         if replay_choice in ('Y', 'y'):
             retain_choice = str(input("Want to retain the same players? (Y/N): "))
@@ -103,10 +106,12 @@ def play_game(curr_player, board_state):
         sys.exit(1)
 
 def initiate(player1_name=None, player2_name=None):
-    if not player1_name:
+    global players
+    if not player1_name and not player2_name:
+        if players:
+            players.clear()
         player1_name = str(input("Enter Player 1 name: "))
         players.append({"name": player1_name})
-    if not player2_name:
         player2_name = str(input("Enter Player 2 name: "))
         players.append({"name": player2_name})
     board_state = reset_board()
